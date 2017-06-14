@@ -9,6 +9,7 @@ GET     /login                      controllers.HomeController.login
 
 GET     /logout                      controllers.HomeController.logout
 
+GET     /uploadImage                controllers.FileController.uploadImage
 
 POST     /authenticate              controllers.HomeController.userCredentials
 
