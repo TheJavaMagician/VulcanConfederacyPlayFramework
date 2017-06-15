@@ -1,5 +1,6 @@
 package controllers;
 
+import model.FileUpload;
 import model.Login;
 import play.api.db.Database;
 import play.data.*;
@@ -19,6 +20,12 @@ import java.sql.*;
  */
 public class HomeController extends Controller {
 
+    @Inject FormFactory formFactory;
+
+    public Result uploadImageRequest() {
+        return ok(uploadImage.render(formFactory.form(FileUpload.class), ""));
+    }
+
     /**
      * An action that renders an HTML page with a welcome message.
      * The configuration in the <code>routes</code> file means that
@@ -29,7 +36,6 @@ public class HomeController extends Controller {
         return ok(index.render());
     }
 
-    @Inject FormFactory formFactory;
 
     public Result login() {
         return ok(login.render(formFactory.form(Login.class), ""));

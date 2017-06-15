@@ -1,6 +1,11 @@
 package controllers;
 
+import akka.util.ByteString;
+import com.google.common.io.Files;
+import model.FileUpload;
 import model.Login;
+import org.h2.store.fs.FileUtils;
+import play.api.Play;
 import play.api.db.Database;
 import play.data.*;
 import play.mvc.*;
@@ -11,6 +16,8 @@ import play.data.Form;
 import javax.inject.Inject;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.*;
 
 
@@ -34,15 +41,25 @@ public class FileController extends Controller {
         this.db = db;
     }
 
+    @Inject
+    private FormFactory formFactory;
+
     @Security.Authenticated(Secured.class)
-    public Result uploadImage() {
+    public Result uploadImage() throws IOException {
+        // Get the form posted from the login page
+        Form<FileUpload> uploadForm = formFactory.form(FileUpload.class).bindFromRequest();
         Http.MultipartFormData<File> body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart<File> picture = body.getFile("picture");
+
+        Http.RawBuffer bufferedImage = request().body().asRaw();
+
+        ByteString bytes = bufferedImage.
+        Files.toByteArray(picture.getFile());
+
         if (picture != null) {
             String fileName = picture.getFilename();
             String contentType = picture.getContentType();
             File file = picture.getFile();
-            imageToDatabase(file, imageDescription);
             return ok("File uploaded");
         } else {
             flash("error", "Missing file");
@@ -54,6 +71,7 @@ public class FileController extends Controller {
 
         // connect to the vulcan database
         Connection connection = db.getConnection();
+
 
         // Create the SQL for inserting the image into the database
         String insertImage = "INSERT INTO vulcan.image (image_file_name, image_description, image_user_name, image_user_ip) VALUES (?, ?, ?, ?);";
